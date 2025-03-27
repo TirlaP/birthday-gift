@@ -1,11 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import GiftBox from './components/GiftBox'
 import GiftReveal from './components/GiftReveal'
 import Confetti from './components/Confetti'
-import BackgroundEffects from './components/BackgroundEffects'
-import FloatingElements from './components/FloatingElements'
+import ImagePreloader from './components/ImagePreloader'
 import './App.css'
+
+// Lazy load background components to improve initial load time
+const BackgroundEffects = lazy(() => import('./components/BackgroundEffects'));
+const FloatingElements = lazy(() => import('./components/FloatingElements'));
 
 const gifts = [
   {
@@ -102,6 +105,41 @@ function App() {
   const [selectedGift, setSelectedGift] = useState(null);
   const [openedGifts, setOpenedGifts] = useState([]);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  // Extract all image URLs for preloading
+  const imageUrls = gifts.map(gift => gift.image);
+
+  // Track when images are loaded
+  useEffect(() => {
+    let loadedCount = 0;
+    const totalImages = imageUrls.length;
+    
+    const checkAllLoaded = () => {
+      loadedCount++;
+      if (loadedCount === totalImages) {
+        setImagesLoaded(true);
+      }
+    };
+    
+    // Create Image objects to track loading
+    imageUrls.forEach(url => {
+      const img = new Image();
+      img.onload = checkAllLoaded;
+      img.onerror = checkAllLoaded; // Count errors as "loaded" to avoid hanging
+      img.src = url;
+    });
+    
+    // If there are no images, consider them loaded
+    if (totalImages === 0) {
+      setImagesLoaded(true);
+    }
+    
+    return () => {
+      // Cleanup
+      setImagesLoaded(false);
+    };
+  }, [imageUrls]);
 
   const handleOpenGift = (gift) => {
     setSelectedGift(gift);
@@ -118,17 +156,33 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 p-4 sm:p-6 md:p-8 relative overflow-hidden">
+      {/* Preload all gift images */}
+      <ImagePreloader imageUrls={imageUrls} />
+      
+      {/* Loading indicator */}
+      {!imagesLoaded && (
+        <div className="fixed inset-0 bg-white/80 flex items-center justify-center z-50">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-purple-600 font-medium">Loading your gifts...</p>
+          </div>
+        </div>
+      )}
+      
       {/* Background blur gradients (bottom layer) */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
         <div className="absolute top-1/4 -right-20 w-40 h-40 rounded-full bg-gradient-to-br from-pink-200 to-pink-300 opacity-50 blur-xl"></div>
         <div className="absolute bottom-1/4 -left-20 w-40 h-40 rounded-full bg-gradient-to-br from-indigo-200 to-purple-300 opacity-50 blur-xl"></div>
       </div>
       
-      {/* Subtle background effects (layer 1) */}
-      <BackgroundEffects />
-      
-      {/* Floating balloons and gifts (layer 5) */}
-      <FloatingElements />
+      {/* Lazy loaded background components */}
+      <Suspense fallback={null}>
+        {/* Subtle background effects (layer 1) */}
+        <BackgroundEffects />
+        
+        {/* Floating balloons and gifts (layer 5) */}
+        <FloatingElements />
+      </Suspense>
 
       {/* Confetti when opening gifts (top layer) */}
       {showConfetti && <Confetti />}
