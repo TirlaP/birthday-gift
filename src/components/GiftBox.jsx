@@ -56,6 +56,15 @@ const GiftBox = memo(({ gift, isOpened, onClick }) => {
         }
       }}
     >
+      {/* Box base layer */}
+      <div className="absolute inset-0 rounded-md bg-gradient-to-br z-0"></div>
+      
+      {/* Ribbon vertical */}
+      <div className={`absolute w-6 h-full top-0 left-1/2 -ml-3 bg-gradient-to-br ${gift.colors.ribbon} z-10`} />
+      
+      {/* Ribbon horizontal */}
+      <div className={`absolute w-full h-6 top-1/3 -mt-3 bg-gradient-to-br ${gift.colors.ribbon} z-20`} />
+      
       {/* Simplified Gift Bow */}
       <div className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2 w-10 sm:w-12 h-6 sm:h-8 z-30">
         <div 
@@ -84,25 +93,6 @@ const GiftBox = memo(({ gift, isOpened, onClick }) => {
         }}
       />
       
-      {/* Ribbon vertical */}
-      <div className={`absolute w-6 h-full top-0 left-1/2 -ml-3 bg-gradient-to-br ${gift.colors.ribbon} z-10`} />
-      
-      {/* Ribbon horizontal */}
-      <div className={`absolute w-full h-6 top-1/3 -mt-3 bg-gradient-to-br ${gift.colors.ribbon} z-20`} />
-      
-      {/* Gift label */}
-      <div className="absolute bottom-3 left-0 right-0 text-center text-white font-bold drop-shadow-md">
-        {isOpened ? (
-          <div className="flex items-center justify-center space-x-1">
-            <span className="text-sm">✓ Opened</span>
-          </div>
-        ) : (
-          <div className="bg-black/20 backdrop-blur-sm px-3 py-1 rounded-full">
-            <span className="text-sm sm:text-base">Click to open!</span>
-          </div>
-        )}
-      </div>
-
       {/* Box shadow for depth */}
       <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4/5 h-2 bg-black/10 rounded-full blur-sm" />
       
@@ -112,6 +102,22 @@ const GiftBox = memo(({ gift, isOpened, onClick }) => {
           className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-50 pointer-events-none"
         />
       )}
+      
+      {/* Gift label - Moved outside the ribbons with higher z-index */}
+      <div 
+        className="absolute bottom-3 left-0 right-0 flex items-center justify-center z-50"
+        style={{ filter: "drop-shadow(0px 2px 2px rgba(0,0,0,0.3))" }}
+      >
+        {isOpened ? (
+          <div className="bg-black/40 backdrop-blur-sm px-4 py-1.5 rounded-full">
+            <span className="text-sm text-white font-bold">✓ Opened</span>
+          </div>
+        ) : (
+          <div className="bg-black/40 backdrop-blur-sm px-4 py-1.5 rounded-full">
+            <span className="text-sm sm:text-base text-white font-bold">Click to open!</span>
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 });
