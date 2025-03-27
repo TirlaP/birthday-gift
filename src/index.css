@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styling */
+@layer components {
+  .gift-box {
+    @apply relative bg-gradient-to-br cursor-pointer transform transition-all duration-300 shadow-lg rounded-lg overflow-hidden;
+  }
+  
+  .gift-message {
+    @apply max-w-md mx-auto backdrop-blur-sm p-6 rounded-xl shadow-xl text-center;
+  }
+  
+  .confetti {
+    @apply fixed pointer-events-none z-50;
+  }
+}
+
+/* Performance optimizations */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* For the wheel segments */
+:root {
+  --tw-pink-500: #ec4899;
+  --tw-rose-500: #f43f5e;
+  --tw-blue-500: #3b82f6;
+  --tw-cyan-500: #06b6d4;
+  --tw-purple-500: #a855f7;
+  --tw-indigo-500: #6366f1;
+  --tw-amber-500: #f59e0b;
+  --tw-orange-500: #f97316;
+  --tw-emerald-500: #10b981;
+  --tw-teal-500: #14b8a6;
+  --tw-red-500: #ef4444;
+  --tw-violet-500: #8b5cf6;
+  --tw-yellow-500: #eab308;
+}
+
+/* Simple scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(243, 244, 246, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, rgb(216, 180, 254), rgb(245, 208, 254));
+  border-radius: 4px;
+}
