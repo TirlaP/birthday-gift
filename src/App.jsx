@@ -14,7 +14,7 @@ const gifts = [
   {
     id: 1,
     name: "New Camera",
-    image: "/images/gift1.jpg", // Empty link for you to fill
+    image: "/images/gift1.jpeg", // Updated to .jpeg extension
     description: "I got you that Canon camera you've been wanting! It's still being shipped, but it will arrive next week.",
     colors: {
       box: "from-pink-500 to-rose-500",
@@ -25,7 +25,7 @@ const gifts = [
   {
     id: 2,
     name: "Spa Day",
-    image: "/images/gift2.jpg", // Empty link for you to fill
+    image: "/images/gift2.jpeg", // Updated to .jpeg extension
     description: "A full day at the spa with all treatments included. You deserve some relaxation!",
     colors: {
       box: "from-blue-500 to-cyan-500",
@@ -36,7 +36,7 @@ const gifts = [
   {
     id: 3,
     name: "Concert Tickets",
-    image: "/images/gift3.jpg", // Empty link for you to fill
+    image: "/images/gift3.jpeg", // Updated to .jpeg extension
     description: "Two tickets to see your favorite band next month! I'll be your plus one if you want 😉",
     colors: {
       box: "from-purple-500 to-indigo-500",
@@ -47,7 +47,7 @@ const gifts = [
   {
     id: 4,
     name: "Weekend Getaway",
-    image: "/images/gift4.jpg", // Empty link for you to fill
+    image: "/images/gift4.jpeg", // Updated to .jpeg extension
     description: "A weekend trip to that cute B&B by the beach you've been talking about!",
     colors: {
       box: "from-amber-500 to-orange-500",
@@ -58,7 +58,7 @@ const gifts = [
   {
     id: 5,
     name: "Art Supplies",
-    image: "/images/gift5.jpg", // Empty link for you to fill
+    image: "/images/gift5.jpeg", // Updated to .jpeg extension
     description: "A complete set of professional art supplies for your new painting hobby!",
     colors: {
       box: "from-emerald-500 to-teal-500",
@@ -69,7 +69,7 @@ const gifts = [
   {
     id: 6,
     name: "Mystery Gift",
-    image: "/images/gift6.jpg", // Empty link for you to fill
+    image: "/images/gift6.jpeg", // Updated to .jpeg extension
     description: "This one is a real surprise! You'll have to wait until it arrives to find out what it is...",
     colors: {
       box: "from-red-500 to-rose-500",
@@ -80,7 +80,7 @@ const gifts = [
   {
     id: 7,
     name: "Photo Book",
-    image: "/images/gift7.jpg", // Empty link for you to fill
+    image: "/images/gift7.jpeg", // Updated to .jpeg extension
     description: "A custom photo album with all our best memories together. It's a trip down memory lane!",
     colors: {
       box: "from-violet-500 to-purple-500",
@@ -91,7 +91,7 @@ const gifts = [
   {
     id: 8,
     name: "Jewelry",
-    image: "/images/gift8.jpg", // Empty link for you to fill
+    image: "/images/gift8.jpeg", // Updated to .jpeg extension
     description: "That beautiful necklace you've been eyeing. It'll look perfect on you!",
     colors: {
       box: "from-yellow-500 to-amber-500",
