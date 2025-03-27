@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { motion, useMotionValue } from 'framer-motion';
 
 // Optimized GiftBox with responsive design and performance-focused animations
-const GiftBox = ({ gift, isOpened, onClick }) => {
+// Memoized to prevent unnecessary re-renders
+const GiftBox = memo(({ gift, isOpened, onClick }) => {
   const [isHovering, setIsHovering] = useState(false);
   // Using motion values for more performant animations
   const scale = useMotionValue(1);
@@ -19,10 +20,15 @@ const GiftBox = ({ gift, isOpened, onClick }) => {
   }, [scale]);
   
   // Get a predictable random value for staggered floating
-  const getRandomOffset = (id) => {
+  const getRandomOffset = useCallback((id) => {
     // Use the gift id to create a deterministic "random" offset
     return (((id * 9973) % 8) / 8) * 1.5;
-  };
+  }, []);
+  
+  // Memoize the click handler
+  const handleClick = useCallback(() => {
+    onClick(gift);
+  }, [gift, onClick]);
   
   return (
     <motion.div
@@ -30,8 +36,8 @@ const GiftBox = ({ gift, isOpened, onClick }) => {
         hidden: { opacity: 0, y: 20 },
         show: { opacity: 1, y: 0 }
       }}
-      className={`gift-box ${gift.colors.box} relative overflow-visible h-36 sm:h-40 md:h-44 w-full max-w-xs mx-auto`}
-      onClick={onClick}
+      className={`gift-box bg-gradient-to-br ${gift.colors.box} relative overflow-visible h-36 sm:h-40 md:h-44 w-full max-w-xs mx-auto`}
+      onClick={handleClick}
       onHoverStart={handleHoverStart}
       onHoverEnd={handleHoverEnd}
       style={{ scale }}
@@ -53,19 +59,19 @@ const GiftBox = ({ gift, isOpened, onClick }) => {
       {/* Simplified Gift Bow */}
       <div className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2 w-10 sm:w-12 h-6 sm:h-8 z-30">
         <div 
-          className={`absolute w-full h-6 rounded-full ${gift.colors.ribbon} opacity-90`}
+          className={`absolute w-full h-6 rounded-full bg-gradient-to-r ${gift.colors.ribbon} opacity-90`}
         />
         <div 
-          className={`absolute w-5 sm:w-6 h-6 sm:h-8 left-1/4 -top-1 transform rotate-45 rounded-full ${gift.colors.ribbon} opacity-90`}
+          className={`absolute w-5 sm:w-6 h-6 sm:h-8 left-1/4 -top-1 transform rotate-45 rounded-full bg-gradient-to-r ${gift.colors.ribbon} opacity-90`}
         />
         <div 
-          className={`absolute w-5 sm:w-6 h-6 sm:h-8 left-1/4 -top-1 transform -rotate-45 rounded-full ${gift.colors.ribbon} opacity-90`}
+          className={`absolute w-5 sm:w-6 h-6 sm:h-8 left-1/4 -top-1 transform -rotate-45 rounded-full bg-gradient-to-r ${gift.colors.ribbon} opacity-90`}
         />
       </div>
 
       {/* Lid */}
       <motion.div 
-        className={`absolute w-full h-1/3 top-0 ${gift.colors.lid} shadow-md`}
+        className={`absolute w-full h-1/3 top-0 bg-gradient-to-br ${gift.colors.lid} shadow-md`}
         animate={isOpened 
           ? { y: -40, rotateX: 60, opacity: 0.8 } 
           : isHovering 
@@ -79,10 +85,10 @@ const GiftBox = ({ gift, isOpened, onClick }) => {
       />
       
       {/* Ribbon vertical */}
-      <div className={`absolute w-6 h-full top-0 left-1/2 -ml-3 ${gift.colors.ribbon} z-10`} />
+      <div className={`absolute w-6 h-full top-0 left-1/2 -ml-3 bg-gradient-to-br ${gift.colors.ribbon} z-10`} />
       
       {/* Ribbon horizontal */}
-      <div className={`absolute w-full h-6 top-1/3 -mt-3 ${gift.colors.ribbon} z-20`} />
+      <div className={`absolute w-full h-6 top-1/3 -mt-3 bg-gradient-to-br ${gift.colors.ribbon} z-20`} />
       
       {/* Gift label */}
       <div className="absolute bottom-3 left-0 right-0 text-center text-white font-bold drop-shadow-md">
@@ -108,6 +114,9 @@ const GiftBox = ({ gift, isOpened, onClick }) => {
       )}
     </motion.div>
   );
-};
+});
+
+// Add display name for better debugging
+GiftBox.displayName = 'GiftBox';
 
 export default GiftBox;

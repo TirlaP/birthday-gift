@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, lazy, Suspense, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import GiftBox from './components/GiftBox'
 import GiftReveal from './components/GiftReveal'
@@ -10,12 +10,13 @@ import './App.css'
 const BackgroundEffects = lazy(() => import('./components/BackgroundEffects'));
 const FloatingElements = lazy(() => import('./components/FloatingElements'));
 
+// Define gifts array outside the component to prevent recreation on re-renders
 const gifts = [
   {
     id: 1,
-    name: "New Camera",
-    image: "/images/gift1.jpeg", // Updated to .jpeg extension
-    description: "I got you that Canon camera you've been wanting! It's still being shipped, but it will arrive next week.",
+    name: "Elegant Gold Snake Ring Collection",
+    image: "/images/gift1.webp", 
+    description: "A stunning collection of gold rings featuring intricate snake designs and beautiful emerald accents. Perfect for making a bold fashion statement!",
     colors: {
       box: "from-pink-500 to-rose-500",
       lid: "from-pink-400 to-rose-400",
@@ -24,9 +25,9 @@ const gifts = [
   },
   {
     id: 2,
-    name: "Spa Day",
-    image: "/images/gift2.jpeg", // Updated to .jpeg extension
-    description: "A full day at the spa with all treatments included. You deserve some relaxation!",
+    name: "Vintage Self-Care Wall Art",
+    image: "/images/gift2.webp",
+    description: "A stylish vintage-inspired metal sign with the empowering message 'And She Lived Happily Ever After' - perfect for your bedroom or bathroom wall!",
     colors: {
       box: "from-blue-500 to-cyan-500",
       lid: "from-blue-400 to-cyan-400",
@@ -35,9 +36,9 @@ const gifts = [
   },
   {
     id: 3,
-    name: "Concert Tickets",
-    image: "/images/gift3.jpeg", // Updated to .jpeg extension
-    description: "Two tickets to see your favorite band next month! I'll be your plus one if you want 😉",
+    name: "Retro Kitchen Wall Decor",
+    image: "/images/gift3.webp",
+    description: "A fun and quirky vintage-style kitchen sign with a humorous twist - 'Don't Make Me Poison Your Food'. Perfect for your kitchen wall!",
     colors: {
       box: "from-purple-500 to-indigo-500",
       lid: "from-purple-400 to-indigo-400",
@@ -46,9 +47,9 @@ const gifts = [
   },
   {
     id: 4,
-    name: "Weekend Getaway",
-    image: "/images/gift4.jpeg", // Updated to .jpeg extension
-    description: "A weekend trip to that cute B&B by the beach you've been talking about!",
+    name: "Sassy Statement Tank Top",
+    image: "/images/gift4.webp",
+    description: "A bold black tank top with the empowering message 'I Only Accept Apologies in Cash' - perfect for casual outings or making a statement!",
     colors: {
       box: "from-amber-500 to-orange-500",
       lid: "from-amber-400 to-orange-400",
@@ -57,9 +58,9 @@ const gifts = [
   },
   {
     id: 5,
-    name: "Art Supplies",
-    image: "/images/gift5.jpeg", // Updated to .jpeg extension
-    description: "A complete set of professional art supplies for your new painting hobby!",
+    name: "Mini Red Shoulder Bag",
+    image: "/images/gift5.webp",
+    description: "A chic burgundy mini shoulder bag with gold hardware, perfect for carrying your essentials while adding a pop of color to any outfit!",
     colors: {
       box: "from-emerald-500 to-teal-500",
       lid: "from-emerald-400 to-teal-400",
@@ -68,9 +69,9 @@ const gifts = [
   },
   {
     id: 6,
-    name: "Mystery Gift",
-    image: "/images/gift6.jpeg", // Updated to .jpeg extension
-    description: "This one is a real surprise! You'll have to wait until it arrives to find out what it is...",
+    name: "Elegant Black Evening Dress",
+    image: "/images/gift6.webp",
+    description: "A stunning black strapless bodycon dress with ruched detailing and side slit - perfect for special occasions and nights out!",
     colors: {
       box: "from-red-500 to-rose-500",
       lid: "from-red-400 to-rose-400",
@@ -79,9 +80,9 @@ const gifts = [
   },
   {
     id: 7,
-    name: "Photo Book",
-    image: "/images/gift7.jpeg", // Updated to .jpeg extension
-    description: "A custom photo album with all our best memories together. It's a trip down memory lane!",
+    name: "Luxurious Lace Lingerie Set",
+    image: "/images/gift7.webp",
+    description: "An elegant black and white floral lace lingerie set with pearl strap details and corset-style front - beautiful and sophisticated!",
     colors: {
       box: "from-violet-500 to-purple-500",
       lid: "from-violet-400 to-purple-400",
@@ -90,9 +91,9 @@ const gifts = [
   },
   {
     id: 8,
-    name: "Jewelry",
-    image: "/images/gift8.jpeg", // Updated to .jpeg extension
-    description: "That beautiful necklace you've been eyeing. It'll look perfect on you!",
+    name: "Designer Red-Bottom Heels",
+    image: "/images/gift8.webp",
+    description: "Classic black patent leather stiletto pumps with the iconic red bottom - timeless, elegant, and perfect for making a statement!",
     colors: {
       box: "from-yellow-500 to-amber-500",
       lid: "from-yellow-400 to-amber-400",
@@ -106,65 +107,87 @@ function App() {
   const [openedGifts, setOpenedGifts] = useState([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  
+  // Extract all image URLs for preloading - memoized to prevent recalculation on rerenders
+  const imageUrls = useMemo(() => gifts.map(gift => gift.image), []);
 
-  // Extract all image URLs for preloading
-  const imageUrls = gifts.map(gift => gift.image);
-
-  // Track when images are loaded
+  // Force loading to complete after 5 seconds even if images aren't all loaded
   useEffect(() => {
-    let loadedCount = 0;
-    const totalImages = imageUrls.length;
-    
-    const checkAllLoaded = () => {
-      loadedCount++;
-      if (loadedCount === totalImages) {
+    const timer = setTimeout(() => {
+      if (!imagesLoaded) {
+        console.log('Forcing loading completion after timeout');
         setImagesLoaded(true);
       }
-    };
+    }, 5000);
     
-    // Create Image objects to track loading
-    imageUrls.forEach(url => {
-      const img = new Image();
-      img.onload = checkAllLoaded;
-      img.onerror = checkAllLoaded; // Count errors as "loaded" to avoid hanging
-      img.src = url;
-    });
-    
-    // If there are no images, consider them loaded
-    if (totalImages === 0) {
-      setImagesLoaded(true);
-    }
-    
-    return () => {
-      // Cleanup
-      setImagesLoaded(false);
-    };
-  }, [imageUrls]);
+    return () => clearTimeout(timer);
+  }, [imagesLoaded]);
 
-  const handleOpenGift = (gift) => {
+  // Memoized handlers to prevent rerenders
+  const handleImageLoadProgress = useCallback((progress) => {
+    setLoadingProgress(progress);
+  }, []);
+  
+  const handleImageLoadComplete = useCallback(() => {
+    console.log('All images preloaded successfully');
+    setImagesLoaded(true);
+  }, []);
+
+  const handleOpenGift = useCallback((gift) => {
     setSelectedGift(gift);
     if (!openedGifts.includes(gift.id)) {
-      setOpenedGifts([...openedGifts, gift.id]);
+      setOpenedGifts(prevOpenedGifts => [...prevOpenedGifts, gift.id]);
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
     }
-  };
+  }, [openedGifts]);
 
-  const closeGiftReveal = () => {
+  const closeGiftReveal = useCallback(() => {
     setSelectedGift(null);
+  }, []);
+
+  // Memoized computation for if all gifts are opened
+  const allGiftsOpened = useMemo(() => 
+    openedGifts.length === gifts.length, 
+    [openedGifts.length]
+  );
+
+  // Animation variants - defined outside render to prevent recreation
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 p-4 sm:p-6 md:p-8 relative overflow-hidden">
-      {/* Preload all gift images */}
-      <ImagePreloader imageUrls={imageUrls} />
+      {/* Preload all gift images with progress tracking */}
+      <ImagePreloader 
+        imageUrls={imageUrls}
+        onProgress={handleImageLoadProgress}
+        onComplete={handleImageLoadComplete}
+      />
       
-      {/* Loading indicator */}
+      {/* Loading indicator with progress */}
       {!imagesLoaded && (
         <div className="fixed inset-0 bg-white/80 flex items-center justify-center z-50">
-          <div className="text-center">
+          <div className="text-center max-w-xs w-full px-6">
             <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-purple-600 font-medium">Loading your gifts...</p>
+            <p className="text-purple-600 font-medium mb-2">Loading your gifts...</p>
+            
+            {/* Progress bar */}
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
+              <div 
+                className="bg-gradient-to-r from-purple-500 to-pink-500 h-2.5 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${Math.max(5, Math.round(loadingProgress * 100))}%` }}
+              ></div>
+            </div>
+            <p className="text-gray-500 text-xs">{Math.round(loadingProgress * 100)}% complete</p>
           </div>
         </div>
       )}
@@ -176,13 +199,15 @@ function App() {
       </div>
       
       {/* Lazy loaded background components */}
-      <Suspense fallback={null}>
-        {/* Subtle background effects (layer 1) */}
-        <BackgroundEffects />
-        
-        {/* Floating balloons and gifts (layer 5) */}
-        <FloatingElements />
-      </Suspense>
+      {imagesLoaded && (
+        <Suspense fallback={null}>
+          {/* Subtle background effects (layer 1) */}
+          <BackgroundEffects />
+          
+          {/* Floating balloons and gifts (layer 5) */}
+          <FloatingElements />
+        </Suspense>
+      )}
 
       {/* Confetti when opening gifts (top layer) */}
       {showConfetti && <Confetti />}
@@ -249,31 +274,23 @@ function App() {
             <motion.p 
               className="text-purple-700 font-medium"
               animate={{ 
-                scale: openedGifts.length === gifts.length ? [1, 1.1, 1] : 1
+                scale: allGiftsOpened ? [1, 1.1, 1] : 1
               }}
               transition={{ 
                 duration: 0.5, 
-                repeat: openedGifts.length === gifts.length ? Infinity : 0,
+                repeat: allGiftsOpened ? Infinity : 0,
                 repeatDelay: 1
               }}
             >
               Gifts Discovered: {openedGifts.length} of {gifts.length}
-              {openedGifts.length === gifts.length && " 🎊"}
+              {allGiftsOpened && " 🎊"}
             </motion.p>
           </div>
         </header>
 
         <motion.div 
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8"
-          variants={{
-            hidden: { opacity: 0 },
-            show: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.1
-              }
-            }
-          }}
+          variants={containerVariants}
           initial="hidden"
           animate="show"
         >
@@ -282,7 +299,7 @@ function App() {
               key={gift.id}
               gift={gift}
               isOpened={openedGifts.includes(gift.id)}
-              onClick={() => handleOpenGift(gift)}
+              onClick={handleOpenGift}
             />
           ))}
         </motion.div>
